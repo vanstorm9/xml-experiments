@@ -94,3 +94,25 @@ navTemplateEnd = """
 </div>
 </div>
 """
+loginBut = """
+<li> <a class="btn btn-launch" href="javascript:;" data-toggle="modal" data-target="#loginModal" data-username="" id="login"> Log-in </a> </li>
+"""
+configBut = '<a class="btn btn-launch" href="javascript:;" data-toggle="modal" data-target="#configModal" data-username="" id="configButton"> <span class="glyphicon glyphicon-wrench"></a> '
+
+configModal = """
+ <div class="modal fade" id="configModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+    <div class="modal-content login-modal">
+        <div class="modal-header login-modal-header">Welcome to my configuration file</div>
+        <div class="modal-body">
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+"""
+
+configModalEnd = """
+</div>
+        <div class="modal-footer"></div>
+        
+    </div>
+    </div>
+    </div>
+"""

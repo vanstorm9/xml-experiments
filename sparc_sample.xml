@@ -3,7 +3,7 @@
 	<system>
 		<name> Online SPARC </name>
 	</system>
-	<config> 
+	<config>  
 		<option name="underlying solver"> 
 			<commandSwitch> -solver </commandSwitch> 
 			<optionvalues>
@@ -13,7 +13,7 @@
 		</option>
 		<option name="Number of Answer Sets"> 
 			<commandSwitch> -numAnswerSets </commandSwitch>
-			<optionInput> integer </optionInput>
+			<optionInput>10</optionInput>
 		</option> 
 	</config>
 	 <navbar>
