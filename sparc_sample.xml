@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<oES>
+	<system>
+		<name> Online SPARC </name>
+	</system>
+	<config> 
+		<option name="underlying solver"> 
+			<commandSwitch> -solver </commandSwitch> 
+			<optionvalues>
+				<li>Clingon</li>
+				<li>DLV</li>
+			</optionvalues>
+		</option>
+		<option name="Number of Answer Sets"> 
+			<commandSwitch> -numAnswerSets </commandSwitch>
+			<optionInput> integer </optionInput>
+		</option> 
+	</config>
+	 <navbar>
+		<right>
+			<button>
+				<text>Animate</text>
+				<id>animateBut</id>
+				<behavior>
+					<program> animate </program> 
+					<editor></editor> 
+				</behavior>
+			</button>
+			<button>
+				<text>Draw</text>
+				<id>drawBut</id>
+				<behavior>
+					<program> animate </program> 
+					<editor></editor> 
+				</behavior>	
+			</button>
+			<button>
+				<inputField> query </inputField>
+				<text>Submit</text>
+				<behavior>			
+					<program> sparc </program>
+					<editor></editor>
+					<inputFieldId> query </inputFieldId>
+				</behavior>
+			</button>
+
+		</right>
+	</navbar>
+</oES>
