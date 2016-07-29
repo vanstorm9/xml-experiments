@@ -1,4 +1,7 @@
 import xml.etree.ElementTree as ET
+from headString import headStr
+from hardcodeStrings import editorStr, bottomJS, navTemplate, navTemplateEnd
+
 #tree = ET.parse('country_data.xml')
 tree = ET.parse('sparc_sample.xml')
 root = tree.getroot()
@@ -28,8 +31,9 @@ def buttonCheck(xmlElement, direction):
                 print ' </li>'
 
 
-print '<html>'
-
+print '<!DOCTYPE html>'
+print'<html lang="en">'
+print headStr
 print '<body>'
 for child in root:
         #print child.tag, child.attrib
@@ -39,8 +43,9 @@ for child in root:
         if child.tag == 'navbar':
             for navbarChild in child:
                 #print navbarChild.tag
-
+                print navTemplate
                 if navbarChild.tag == 'left':
+                    
                     print '<ul class="nav navbar-nav navbar-left">'
                     for leftElement in navbarChild:
 
@@ -51,7 +56,8 @@ for child in root:
                     for rightElement in navbarChild:
                         buttonCheck(rightElement, navbarChild.tag)
                     print '</ul>'
-
+            print navTemplateEnd
+print editorStr, bottomJS
 print '</body>'
 print '</html>'
 
