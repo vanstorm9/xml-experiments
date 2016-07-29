@@ -110,9 +110,9 @@ configModal = """
 
 configModalEnd = """
 </div>
-        <div class="modal-footer"></div>
-        
-    </div>
-    </div>
-    </div>
+<div class="modal-footer"></div>
+</div>
+</div>
+</div>
 """
+saveSettingsBut = '<button type="button" id="saveSettings" class="btn btn-primary" onclick="saveSettings();" >Save settings</button>'

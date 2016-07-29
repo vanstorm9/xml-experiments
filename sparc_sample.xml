@@ -18,14 +18,16 @@
 	</config>
 	 <navbar>
 		<right>
-			<button>
-				<text>Animate</text>
-				<id>animateBut</id>
-				<behavior>
-					<program> animate </program> 
-					<editor></editor> 
-				</behavior>
-			</button>
+            <button>
+                <inputField> query </inputField>
+                <text>Submit</text>
+                <id>submitBut</id>
+                <behavior>          
+                    <program> sparc </program>
+                    <editor></editor>
+                    <inputFieldId> query </inputFieldId>
+                </behavior>
+            </button>
 			<button>
 				<text>Draw</text>
 				<id>drawBut</id>
@@ -34,15 +36,14 @@
 					<editor></editor> 
 				</behavior>	
 			</button>
-			<button>
-				<inputField> query </inputField>
-				<text>Submit</text>
-				<behavior>			
-					<program> sparc </program>
-					<editor></editor>
-					<inputFieldId> query </inputFieldId>
-				</behavior>
-			</button>
+            <button>
+                <text>Animate</text>
+                <id>animateBut</id>
+                <behavior>
+                    <program> animate </program> 
+                    <editor></editor> 
+                </behavior>
+            </button>
 
 		</right>
 	</navbar>

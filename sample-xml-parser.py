@@ -14,21 +14,40 @@ def buttonCheck(xmlElement, direction):
                 butID = ''
                 butTxt = ''
                 butClass = 'class="btn btn-default navbar-btn"'
-                
+                inputID = ''
+                form = False
                 for butProp in xmlElement:
                         if butProp.tag == 'id':
                                 butID = butProp.text
                         elif butProp.tag == 'text':
                                 butTxt = butProp.text
+                        elif butProp.tag == 'inputField':
+                                inputID = butProp.text
+                                form = True
+                                print ''
                         elif butProp.tag == 'behavior':
                                 for behaveChildren in butProp:
-                                        z = 1 + 1
                                         #print behaveChildren.tag
-                
-                buttonHTML = '<button '+ butClass +'id="'+ butID +'">'+ butTxt +'</button>'
-                print ' <li>'
-                print '    ', buttonHTML
-                print ' </li>'
+
+                                        if behaveChildren == 'program':
+                                                z = 1 + 1
+                                        elif behaveChildren == 'editor':
+                                                z = 1 + 1
+                                        elif behaveChildren == 'inputFieldId':
+                                                z = 1 + 1
+
+                if form:
+                        butClass = 'class="btn btn-default"'
+                        buttonHTML = '<button type="button" '+ butClass +' id="'+ butID +'">'+ butTxt +'</button>'
+                        print '<div class="navbar-form navbar-left" id="qform">'
+                        print '<input type="text" class="form-control" placeholder="'+inputID+'" name="txt_query" id="'+inputID+'">'
+                        print buttonHTML
+                        print '</div>'
+                else:
+                        buttonHTML = '<button '+ butClass +'id="'+ butID +'">'+ butTxt +'</button>'
+                        print ' <li>'
+                        print buttonHTML
+                        print ' </li>'
 
 
 def configCheck(xmlElement):
@@ -43,6 +62,7 @@ def configCheck(xmlElement):
 
                                 for options in child:
                                         if options.tag == 'optionvalues':
+                                                print configOptionID
                                                 print '<select id="'+configOptionID+'" style="color:black"> '
                                                 for li in options:
                                                         if li.tag == 'li':
@@ -51,13 +71,15 @@ def configCheck(xmlElement):
                                                                 print optionStr
                                                 print '</select></br></br>'
                                         elif options.tag == 'optionInput':
+                                                print configOptionID
                                                 chosenInt = options.text
                                                 print '<select id="'+configOptionID+'" style="color:black"> '
                                                 
                                                 for i in range(1,int(chosenInt)+1):
                                                         print '<option value="'+str(i)+'">' + str(i) + '</option>'
-                                                print '</select></br></br>'     
-                
+                                                print '</select></br></br>'
+                                
+                print saveSettingsBut
                 print configModalEnd
 
 
