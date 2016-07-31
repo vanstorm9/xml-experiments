@@ -1,3 +1,4 @@
+
 editorStr = """
 <div id="page-content-wrapper">
                 <div id="div_editorpanel">
@@ -452,6 +453,7 @@ function getAccessibleDirectory($user) {
 
     returns : nothing
 */
+/*
 function rec_PrintDirectory($folder) {
 
     $child_folders = $folder->getFolders();
@@ -473,7 +475,7 @@ function rec_PrintDirectory($folder) {
         echo "</ul> </li>";
     }
 }
-
+*/
 /*
     function addNewUser($user, $email, $password) : add the user $user
         with the email $email and the password $password to the database
@@ -781,7 +783,7 @@ function renameFile($username, $oldfilename, $newfilename) {
         return;
     }
 }
-
+/*
 function forgotPassword($email) {
     global $conn;
 
@@ -797,7 +799,7 @@ function forgotPassword($email) {
 
     //return "Email has been sent.";
 }
-
+*/
 /*
     For Mbathio:
     exampleFileStructure() : creates file structure, does not require
@@ -1177,3 +1179,354 @@ if (isset($_POST['action'])) {
 }
 
 """
+
+ajaxCaseBegin = """
+if (isset($_POST['action'])) {
+
+    $username = helper_getSession("username");
+    $code = helper_getPost("editor");
+
+    switch($_POST['action']) {
+    
+"""
+
+ajaxCaseEnd = """
+case 'getAnswerSets':
+            if (empty($code)) { 
+                helper_sendError("No code");
+                return;
+            }
+
+            echo getAnswerSets($code);
+            break;
+			
+		case 'getDrawing':
+            if (empty($code)) { 
+                helper_sendError("No code");
+                return;
+            }
+
+            echo getDrawing($code);
+            break;	
+			
+
+        case 'getQuery':
+            $query = helper_getPost("query");
+            if (empty($code)) { 
+                helper_sendError("No code");
+                return;
+            }
+
+            if (empty($query)) { 
+                helper_sendError("No query");
+                return;
+            }
+
+            getQuery($code, $query);
+            break;
+
+        case 'getLogin':
+            $username = helper_getPost("username");
+            $password = helper_getPost("password");
+            $rememberme = helper_getPost("rememberMeValue"); //TODO
+
+            /*$username = "mbathio"; //TODO remove later
+            $password = "1234567"; //TODO remove later */
+
+            if (empty($username)) { 
+                helper_sendError("No username");
+                return;
+            }
+
+            if (empty($password)) { 
+                helper_sendError("No password");
+                return;
+            }
+
+            $res = getLogin($username, $password);
+            echo $res;
+            break;
+
+        case 'getLogout':
+            $res = getLogout();
+            echo $res;
+            break;
+
+        case 'addNewUser':
+            $username = helper_getPost("username");
+            $email = helper_getPost("email");
+            $password = helper_getPost("password");
+
+            if (empty($username)) { 
+                helper_sendError("No username");
+                return;
+            }
+            if (empty($email)) { 
+                helper_sendError("No email");
+                return;
+            }
+            if (empty($password)) { 
+                helper_sendError("No password");
+                return;
+            }
+
+            echo addNewUser($username, $email, $password);
+            setCurrentUser($username);
+            setCurrentFolder($username . "/");
+            setCurrentFile("");
+            break;
+
+        case 'addNewFile':
+            $filename = helper_getPost("newfile");
+            $currentdir = helper_getSession("currentfolder");
+
+            //$username = "mbathio"; //TODO remove
+            //$fileurl = "mbathio/bro/file2.sp"; //TODO remove
+            //$code = "sorts\n#person =  {bob, sara}."; //TODO remove
+
+            if (empty($username)) {
+                helper_sendError("No username");
+                return;
+            }
+
+            if (empty($filename)) {
+                helper_sendError("No fileurl");
+                return;
+            }
+
+            if (empty($currentdir)) {
+                helper_sendError("No current directory");
+                return;
+            }
+
+            $fileurl = $currentdir . $filename;
+            
+            echo addNewFile($username, $fileurl, $code);
+            break;
+
+        case 'addNewFolder':
+            $folderurl = helper_getPost("newfolder");
+            $currentdir = helper_getSession("currentfolder");
+            //$username = "christian"; //TODO remove
+
+            if (empty($username)) {
+                helper_sendError("No username");
+                return;
+            }
+
+            if (empty($currentdir)) {
+                helper_sendError("No current directory");
+                return;
+            }
+
+            if (empty($folderurl)) {
+                helper_sendError("No folderurl");
+                return;
+            }
+
+            $extendedfolderurl = $currentdir . $folderurl . "/";
+
+            echo addNewFolder($username, $extendedfolderurl);
+            break;
+
+        case 'getAccessibleDirectory':
+            /*$username = "christian"; //TODO remove */
+
+            if (empty($username)) {
+                helper_sendError("No username");
+                return;
+            }
+
+            $root = getAccessibleDirectory($username);
+            rec_printDirectory($root);
+            break;
+
+        case 'getExampleFileStructure':
+            $root = exampleFileStructure();
+            rec_printDirectory($root);
+            break;
+
+        case 'getFileContent':
+            $fileurl = helper_getPost("fileurl");
+
+            // TODO empty means template
+
+            echo getFileContent($fileurl);
+            break;
+
+        case 'setCurrentFolder':
+            $folderurl = helper_getPost("currentfolder");
+
+            //if (empty($folderurl)) { echo "No folderurl"; return; }
+            if (empty($folderurl)) { 
+                if (empty($username)) {
+                    $folderurl = "";
+                } else {
+                    // TODO assumes root directory is username + "/"
+                    // TODO do i put this here or somewhere else 
+                    $folderurl = $username . "/";
+                }
+            }
+
+            echo setCurrentFolder($folderurl);
+            break;
+
+        case 'setCurrentFile':
+            $fileurl = helper_getPost("currentfile");
+            echo setCurrentFile($fileurl);
+            break;
+
+        case 'getCurrentUser':
+            echo $username;
+            break;
+
+        case 'getCurrentFile':
+            $fileurl = helper_getSession("currentfile");
+            echo $fileurl;
+            break;
+
+        case 'getCurrentFolder':
+            $folderurl = helper_getSession("currentfolder");
+            echo $folderurl;
+            break;
+
+        case 'deleteFile':
+            $fileurl = helper_getPost("fileurl");
+
+            //$username = "christian"; //TODO remove this
+            //$fileurl = "christian/deletethis.sp"; //TODO remove this
+
+            if (empty($username)) {
+                helper_sendError("No username");
+                return;
+            }
+
+            if (empty($fileurl)) {
+                helper_sendError("No fileurl");
+                return;
+            }
+
+            echo addNewFile($username, $fileurl, "");
+            echo deleteFile($username, $fileurl);
+            break;
+
+        case 'deleteFolder':
+            $folderurl = helper_getPost("folderurl");
+
+            //$username = "christian"; //TODO remove this
+            //$folderurl = "christian/deletefolder/"; //TODO remove this
+
+            if (empty($username)) {
+                helper_sendError("No username");
+                return;
+            }
+
+            if (empty($folderurl)) {
+                helper_sendError("No folderurl");
+                return;
+            }
+
+            echo deleteFolder($username, $folderurl);
+            break;
+
+        case 'saveFile':
+            $frontend_fileurl = helper_getPost("fileurl");
+            $backend_fileurl = helper_getSession("currentfile");
+            $code = helper_getPost("editor");
+
+            if (empty($username)) {
+                helper_sendError("No username.");
+                return;
+            }
+
+            if (empty($frontend_fileurl)) {
+                helper_sendError("No fileurl");
+                return;
+            }
+
+            echo saveFile($username, $frontend_fileurl, $code);
+
+            break;
+
+        case 'shareFile':
+            $username2 = helper_getPost("username2");
+            $frontend_fileurl = helper_getPost("fileurl");
+            $backend_fileurl = helper_getSession("currentfile");
+            $permissions = helper_getPost("permissions");
+
+            if (empty($username2)) { 
+                helper_sendError("No username to share with");
+                return; 
+            }
+
+            if (empty($frontend_fileurl)) {
+                helper_sendError("No fileurl");
+                return;
+            }
+
+            if (empty($permissions)) {
+                helper_sendError("No permissions");
+                return;
+            }
+
+            if (empty($backend_fileurl)) { 
+                helper_sendError("Error storing fileurl in session variable.");
+                return;
+            }
+
+            if ($frontend_fileurl != $backend_fileurl) {
+                echo "FILEURL mismatch between front/back end";
+                return;
+            }
+
+            echo shareFile($frontend_fileurl, $username2, $permissions);
+            break;
+
+        case 'addIssue':
+            $issue = helper_getPost("issue");
+
+            if (empty($issue)) {
+                return;
+            }
+            echo addIssue($issue);
+            break;
+
+        case 'renameFile':
+            $oldfileurl = helper_getPost("oldfileurl");
+            $newfileurl = helper_getPost("oldfileurl");
+
+            if (empty($username)) {
+                helper_sendError("No username.");
+                return;
+            }
+
+            if (empty($oldfileurl)) {
+                helper_sendError("No old file name");
+                return;
+            }
+
+            if (empty($newfileurl)) {
+                helper_sendError("No new file name");
+                return;
+            }
+
+            echo renameFile($username, $oldfileurl, $newfileurl);
+            break;
+
+        case 'forgotPassword':
+            $email = helper_getPost("email");
+            if (empty($email)) {
+                helper_sendError("No email");
+                return;
+            }
+            echo forgotPassword($email);
+
+            break;
+
+        default:
+            echo "Not a valid action";
+            break;
+    }
+}
+"""
+

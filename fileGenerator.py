@@ -7,7 +7,10 @@ from hardcodeStrings import *
 tree = ET.parse('sparc_sample.xml')
 root = tree.getroot()
 
-text_file = open("../../github/asp/test.html", "w")
+text_file = open("../../test.php", "w")
+
+ajaxList = []
+ajaxParam = []
 
 def buttonCheck(xmlElement, direction):
         # Going to generate HTML buttons
@@ -34,6 +37,7 @@ def buttonCheck(xmlElement, direction):
                         # Iterate through the tags in the button
                         if butProp.tag == 'id':
                                 butID = butProp.text
+                                ajaxList.append(butID)
                         elif butProp.tag == 'text':
                                 butTxt = butProp.text
                         elif butProp.tag == 'inputField':
@@ -73,9 +77,9 @@ def buttonCheck(xmlElement, direction):
                                 text_file.write("var queryValue"+str(i)+" = $('#"+textFieldID+"').val();")
                                 paramStr = paramStr + ",'p"+str(i)+"': queryValue"+str(i) 
                                 i += 1
-                        paramStr = paramStr + '};'
-                        text_file.write("var data = {'action': \""+inputID+"\",'editor': editorValue " + paramStr)
-                        text_file.write("alert(editorValue);")
+                        ajaxParam.append([butID,i])
+			paramStr = paramStr + '};'
+                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'numPar':"+str(i)+" " + paramStr)
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
                         text_file.write('</script>')
@@ -88,10 +92,13 @@ def buttonCheck(xmlElement, direction):
 
                         text_file.write('<script>')
                         text_file.write("$('#"+butID+"').click(function(e) {")
-                        text_file.write("alert('"+butID+"');")
+                        text_file.write('e.preventDefault();')
+                        text_file.write('var editorValue = editor.getValue();')
+                        i = 0
+                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue};")
+                        text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
                         text_file.write('</script>')
-
 
 
 def configCheck(xmlElement):
@@ -131,6 +138,7 @@ text_file.write('<!DOCTYPE html>')
 text_file.write('<html lang="en">')
 text_file.write(headStr)
 text_file.write('<body>')
+text_file.write("<script>var ajaxurl = 'ajax.php'</script>")
 for child in root:
         # We are going to try to e
         if child.tag == 'config':
@@ -164,9 +172,35 @@ text_file.write('</html>')
 
 text_file.close()
 
+# Now going to generate mock copy of ajax.php
+fileAjax = open("../../ajax.php", "w")
+
+fileAjax.write(ajaxPHPbegin)
+fileAjax.write(ajaxCaseBegin)
 
 
+#fileAjax.write('$numPar = helper_getPost("numPar");')
+for but in ajaxList:
+        
+	fileAjax.write("case '"+but+"':")
+        fileAjax.write("echo '<h1>Executing "+but+".exe</h1>';")
+        fileAjax.write("echo '<h2>Parameters: </h2>';")
+	for name,i in ajaxParam:
 
+		if name == but:
+			numOfParam = int(i)
+			for x in range(0,i):
+				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
+				fileAjax.write(tempStr)
 
+			fileAjax.write("echo '<h2>Code:</h2> ' . $code . '</br>';")
+	fileAjax.write("break;")
+        
+fileAjax.write(ajaxCaseEnd)
+fileAjax.write(ajaxPHPending)
+
+fileAjax.close()
+
+print 'Done'
 
 
