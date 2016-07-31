@@ -26,6 +26,7 @@
                     <program> sparc </program>
                     <editor></editor>
                     <inputFieldId>query</inputFieldId>
+                    <inputFieldId>tomatos</inputFieldId>
                 </behavior>
             </button>
 			<button>

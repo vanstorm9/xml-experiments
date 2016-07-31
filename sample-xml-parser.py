@@ -16,6 +16,8 @@ def buttonCheck(xmlElement, direction):
                 butClass = 'class="btn btn-default navbar-btn"'
                 inputID = ''
                 onclick = ''
+                editorSelect = ''
+                programSelect = ''
                 
                 form = False
                 for butProp in xmlElement:
@@ -32,9 +34,9 @@ def buttonCheck(xmlElement, direction):
                                         #print behaveChildren.tag
 
                                         if behaveChildren == 'program':
-                                                z = 1 + 1
+                                                programSelect = behaveChildren.tag
                                         elif behaveChildren == 'editor':
-                                                z = 1 + 1
+                                                editorSelect = behaveChildren.tag
                                         elif behaveChildren == 'inputFieldId':
                                                 z = 1 + 1
 
@@ -51,7 +53,7 @@ def buttonCheck(xmlElement, direction):
                         print 'e.preventDefault();'
                         print 'var editorValue = editor.getValue();'
                         print "var queryValue = $('#"+inputID+"').val();"
-                        print "var data = {'action': \"getQuery\",'query': queryValue,'editor': editorValue};"
+                        print "var data = {'action': \""+inputID+"\",'editor': editorValue ,'p1': queryValue};"
                         print "alert(editorValue);"
                         print '$.post(ajaxurl, data, function(response) {setResultsToString(response);});'
                         print '});'
