@@ -153,6 +153,10 @@ for child in root:
                     text_file.write(loginBut)
                     text_file.write('</ul>')
             text_file.write(navTemplateEnd)
+
+            
+        text_file.write(beginLoginModal)
+
 text_file.write(editorStr)
 text_file.write(bottomJS)
 text_file.write('</body>')
