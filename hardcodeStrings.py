@@ -122,7 +122,7 @@ configModalEnd = """
 </div>
 </div>
 """
-saveSettingsBut = '<button type="button" id="saveSettings" class="btn btn-primary" onclick="saveSettings();" >Save settings</button>'
+saveSettingsBut = '<button type="button" id="saveSettings" class="btn btn-primary" onclick="saveDaSettings();" >Save settings</button><script>function saveDaSettings(){alert("Settings saved!");}</script>'
 
 beginLoginModal = """
  <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
