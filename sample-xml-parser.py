@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from headString import headStr
 from hardcodeStrings import *
 
+
 #tree = ET.parse('country_data.xml')
 tree = ET.parse('sparc_sample.xml')
 root = tree.getroot()
@@ -18,33 +19,47 @@ def buttonCheck(xmlElement, direction):
                 onclick = ''
                 editorSelect = ''
                 programSelect = ''
+
+                inputField = ''
+                inputFieldID = ''
                 
                 form = False
+
+                textFieldList = []
+                textFieldIDList = []
+
                 for butProp in xmlElement:
+                        # Iterate through the tags in the button
                         if butProp.tag == 'id':
                                 butID = butProp.text
                         elif butProp.tag == 'text':
                                 butTxt = butProp.text
                         elif butProp.tag == 'inputField':
-                                inputID = butProp.text
+                                inputTxt = butProp.text
                                 form = True
+                                textFieldList.append(inputTxt)
                                 print ''
                         elif butProp.tag == 'behavior':
                                 for behaveChildren in butProp:
                                         #print behaveChildren.tag
 
-                                        if behaveChildren == 'program':
-                                                programSelect = behaveChildren.tag
-                                        elif behaveChildren == 'editor':
-                                                editorSelect = behaveChildren.tag
-                                        elif behaveChildren == 'inputFieldId':
-                                                z = 1 + 1
+                                        if behaveChildren.tag == 'program':
+                                                programSelect = behaveChildren.text
+                                        elif behaveChildren.tag == 'editor':
+                                                editorSelect = behaveChildren.text
+                                        elif behaveChildren.tag == 'inputFieldId':
+                                                inputFieldID = behaveChildren.text
+                                                textFieldIDList.append(inputFieldID)
+
 
                 if form:
                         butClass = 'class="btn btn-default"'
                         buttonHTML = '<button type="button" '+ butClass +' id="'+ butID +'">'+ butTxt +'</button>'
                         print '<div class="navbar-form navbar-left" id="qform">'
-                        print '<input type="text" class="form-control" placeholder="'+inputID+'" name="txt_query" id="'+inputID+'">'
+                        i = 0
+                        for inputTxt in textFieldList:
+                                print '<input type="text" class="form-control" placeholder="'+inputTxt+'" name="txt_query" id="'+textFieldIDList[i]+'">'
+                                i += 1
                         print buttonHTML
                         print '</div>'
 
@@ -52,8 +67,14 @@ def buttonCheck(xmlElement, direction):
                         print "$('#"+butID+"').click(function(e) {"
                         print 'e.preventDefault();'
                         print 'var editorValue = editor.getValue();'
-                        print "var queryValue = $('#"+inputID+"').val();"
-                        print "var data = {'action': \""+inputID+"\",'editor': editorValue ,'p1': queryValue};"
+                        i = 0
+                        paramStr = ""
+                        for textFieldID in textFieldIDList:
+                                print "var queryValue"+str(i)+" = $('#"+textFieldID+"').val();"
+                                paramStr = paramStr + ",'p"+str(i)+"': queryValue"+str(i) 
+                                i += 1
+                        paramStr = paramStr + '}'
+                        print "var data = {'action': \""+inputID+"\",'editor': editorValue " + paramStr
                         print "alert(editorValue);"
                         print '$.post(ajaxurl, data, function(response) {setResultsToString(response);});'
                         print '});'

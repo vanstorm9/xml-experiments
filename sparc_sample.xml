@@ -19,14 +19,15 @@
 	 <navbar>
 		<right>
             <button>
-                <inputField>query</inputField>
+                <inputField>enter query</inputField>
+                <inputField>enter tomatoes</inputField>
                 <text>Submit</text>
                 <id>submitBut</id>
                 <behavior>          
                     <program> sparc </program>
                     <editor></editor>
                     <inputFieldId>query</inputFieldId>
-                    <inputFieldId>tomatos</inputFieldId>
+                    <inputFieldId>tomatoes</inputFieldId>
                 </behavior>
             </button>
 			<button>
