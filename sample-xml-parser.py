@@ -15,6 +15,8 @@ def buttonCheck(xmlElement, direction):
                 butTxt = ''
                 butClass = 'class="btn btn-default navbar-btn"'
                 inputID = ''
+                onclick = ''
+                
                 form = False
                 for butProp in xmlElement:
                         if butProp.tag == 'id':
@@ -48,6 +50,13 @@ def buttonCheck(xmlElement, direction):
                         print ' <li>'
                         print buttonHTML
                         print ' </li>'
+
+                        print '<script>'
+                        print "$('#"+butID+"').click(function(e) {"
+                        print "alert('"+butID+"');"
+                        print '});'
+                        print '</script>'
+
 
 
 def configCheck(xmlElement):
@@ -114,6 +123,19 @@ for child in root:
                     print '</ul>'
             print navTemplateEnd
 print editorStr, bottomJS
+
+'''
+print '<scipt>'
+
+
+print 'function butManage(butValue){'
+#print "if(butVal =='", 
+print '}'
+
+
+print '</script>'
+'''
+
 print '</body>'
 print '</html>'
 

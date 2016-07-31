@@ -32,7 +32,7 @@
 				<text>Draw</text>
 				<id>drawBut</id>
 				<behavior>
-					<program> animate </program> 
+					<program> sparc </program> 
 					<editor></editor> 
 				</behavior>	
 			</button>
