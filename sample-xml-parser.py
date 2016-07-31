@@ -45,6 +45,18 @@ def buttonCheck(xmlElement, direction):
                         print '<input type="text" class="form-control" placeholder="'+inputID+'" name="txt_query" id="'+inputID+'">'
                         print buttonHTML
                         print '</div>'
+
+                        print '<script>'
+                        print "$('#"+butID+"').click(function(e) {"
+                        print 'e.preventDefault();'
+                        print 'var editorValue = editor.getValue();'
+                        print "var queryValue = $('#"+inputID+"').val();"
+                        print "var data = {'action': \"getQuery\",'query': queryValue,'editor': editorValue};"
+                        print "alert(editorValue);"
+                        print '$.post(ajaxurl, data, function(response) {setResultsToString(response);});'
+                        print '});'
+                        print '</script>'
+                        
                 else:
                         buttonHTML = '<button '+ butClass +'id="'+ butID +'">'+ butTxt +'</button>'
                         print ' <li>'

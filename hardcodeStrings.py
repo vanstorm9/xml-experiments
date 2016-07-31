@@ -49,9 +49,15 @@ editorStr = """
 bottomJS = """
 
 <!-- **** END OF LOGIN **** -->
-
         <!-- NAVBAR RESPONSE HANDLER -->
         <script src="scripts/navbar-response.js" type="text/javascript" charset="utf-8"></script>
+
+        <script>
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/textmate");
+        editor.getSession().setMode("ace/mode/sparc");
+        </script>
+        
 
         <!-- EASYTREE -->
         <script src="scripts/easyTree.js" type="text/javascript" charset="utf-8"></script>

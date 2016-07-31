@@ -26,5 +26,5 @@ headStr = """<head>
         <link rel="stylesheet" type="text/css" href="stylesheets/easyTree.css">
         <link href="stylesheets/simple-sidebar.css" rel="stylesheet">
 
-
+        
     </head>"""
