@@ -832,6 +832,542 @@ function exampleFileStructure() {
 ?>
 """
 
+
+ajaxPHPSemiEndingBegin= """
+
+/*
+    helper_getPost($parameter) : checks if the HTTP POST request was set
+        for parameter $parameter
+
+    $parameter : the HTTP POST request parameter
+
+    returns : the value for the given parameter from the HTTP POSt,
+        "" otherwise
+*/
+function helper_getPost($parameter) {
+    if (isset($_POST[$parameter])) {
+        return $_POST[$parameter];
+    }
+    return "";
+}
+
+/*
+    helper_getSession($parameter) : checks if the PHP Session was set
+        for parameter $parameter
+
+    $parameter : the PHP Session vaiable parameter
+
+    returns : the value for the given parameter from the PHP Session,
+        "" otherwise
+*/
+function helper_getSession($parameter) {
+    if (isset($_SESSION[$parameter])) {
+        return $_SESSION[$parameter];
+    }
+    return "";
+}
+
+function helper_sendError($error) {
+    echo "Something went wrong: " . $error;
+    return;
+}
+
+function helper_isError($string) {
+    $errormessage = "Error";
+    if (strpos($string, $errormessage) !== FALSE) {
+        return true;
+    }
+    return false;
+}
+
+/*
+    getLogin($input_user, $input_pass) : connects the user to the database
+        and the connection is used to login user $input_user with password
+        $input_password
+
+    $input_user : string username to try to login
+    $input_pass : string passwod to try to login
+
+    returns : nothing
+    //TODO return true/false remove echo
+*/
+function getLogin($input_user, $input_pass) {
+    global $conn;
+
+    $res = db_login($conn, $input_user, $input_pass);
+
+    $successMessage = "Login successful";
+    if ($res === $successMessage) {
+        $_SESSION["username"] = $input_user;
+        // TODO assumption : folder on log-in is username directory
+        $_SESSION["currentfolder"] = $input_user . "/";
+        return true;
+    }
+    return false;
+}
+
+/*
+    getLogout() : logs the user out from the database, this is effectively
+        done by clearing the SESSION variable for username; no username
+        means not logged in //TODO this is pretty hacky
+
+    returns : T/F to session_destroy call
+*/
+function getLogout() {
+    return session_destroy();
+}
+
+/*
+    getAccessibleDirectory($user) : gets all folders and files available
+        to user $user and then returns the root folder for the directory 
+        of $user
+
+    $user : string username of person whose accessible directory is required
+
+    returns : Folder root of directory tree
+*/
+function getAccessibleDirectory($user) {
+    global $conn;
+
+    $folderurls = db_getAllFolders($conn, $user);
+
+    $fileurls = db_getAllFiles($conn, $user);
+
+    $root = new Folder("root", "");
+    // for every folderurl we have access to
+    foreach ($folderurls as $folderurl) {
+        $urlarray = explode("/", $folderurl);
+        $curr_folder = $root;
+        array_pop($urlarray); // remove last blank
+
+        // for every folder in every folderurl
+        foreach ($urlarray as $folder) {
+            $newfolder = new Folder($folder, $curr_folder->getFolderUrl() . $folder . "/");
+            if (!$curr_folder->hasFolder($newfolder)) {
+                $curr_folder->addFolder($newfolder);
+                $curr_folder = $newfolder;
+            } else { 
+                $curr_folder = $curr_folder->getFolder($newfolder);
+            }
+        }
+    }
+
+    foreach ($fileurls as $fileurl) {
+        $urlarray = explode("/", $fileurl);
+        $filename = array_pop($urlarray); // remove last blank
+        $curr_folder = $root;
+
+        // create folders if they don't already exist
+        foreach ($urlarray as $folder) {
+            $newfolderurl = $curr_folder->getFolderUrl() . $folder . "/";
+            $newfolder = new Folder($folder, $newfolderurl);
+            if (!$curr_folder->hasFolder($newfolder)) {
+                $curr_folder->addFolder($newfolder);
+                $curr_folder = $newfolder;
+            } else {
+                $curr_folder = $curr_folder->getFolder($newfolder);
+            }
+        }
+
+        $newfile = new File($filename, $fileurl);
+        $curr_folder->addFile($newfile);
+    }
+
+    return $root;
+
+}
+
+/*
+    rec_PrintDirectory($folder, $tab) : recursively print all subfolders
+        and files within folder $folder while keeping track of the number
+        of spaces $tab for each print
+
+    $folder : root Folder object 
+    $tab : number of tabs for indenting file structure
+
+    returns : nothing
+*/
+/*
+function rec_PrintDirectory($folder) {
+
+    $child_folders = $folder->getFolders();
+    $child_files = $folder->getFiles();
+
+    foreach($child_files as $cf) {
+        echo "<li data-value=\"" . $cf->getFileUrl() . "\""
+                . " class=\"dir-item\""
+                . ">" 
+                . $cf->getName() . "</li>";
+    }
+
+    foreach($child_folders as $cf) {
+        echo "<li data-value=\"" . $cf->getFolderUrl() . "\""
+            . " class=\"dir-folder\""
+            . ">"
+            . $cf->getName() . "<ul>";
+        rec_PrintDirectory($cf);
+        echo "</ul> </li>";
+    }
+}
+*/
+/*
+    function addNewUser($user, $email, $password) : add the user $user
+        with the email $email and the password $password to the database
+        and then create their root folder and give them access
+
+    keywords: register, registration
+
+    $user : string username of the user
+    $email : string email of the user
+    $password : string password of the user
+
+    returns : nothing
+    //TODO check all db accesses are succesful
+*/
+function addNewUser($user, $email, $password) {
+    global $conn;
+
+
+    $addUserResponse = db_addUser($conn, $user, $email, $password);
+    if (helper_isError($addUserResponse)) {
+        helper_sendError("Username already exists"); // TODO this isnt alone
+        return false;
+    }
+
+    $folderurl = $user . "/";
+    
+    $addFolderResponse = db_addFolder($conn, $user, $folderurl);
+    if (helper_isError($addFolderResponse)) {
+        helper_sendError("Cannot create root folder"); // TODO this isnt alone
+        return false;
+    }
+
+    $addHasAccessResponse = db_addHasAccess($conn, $user, $folderurl, ".", 1);
+    if (helper_isError($addHasAccessResponse)) {
+        helper_sendError("Cannot give access to root folder"); // TODO this isnt alone
+        return false;
+    }
+
+    fs_addFolder($folderurl);
+
+    return true;
+}
+
+/*
+    addNewFile($user, $file, $code) : adds a new file $file with content
+        $code to the internal file structure and gives ownership and
+        access to user $user
+
+    $user : string username of the user
+    $file : string fileurl of the file
+    $code : string code of the editor code
+
+    returns : fileurl
+*/
+function addNewFile($user, $fileurl, $code) {
+    global $conn;
+
+    db_addFile($conn, $user, $fileurl);
+
+    // remove file from the fileurl to get folderurl
+    $folderarray = explode("/", $fileurl);
+    $owner = $folderarray[0];
+    array_pop($folderarray);
+    $folderurl = implode("/", $folderarray);
+    $folderurl .= "/";
+
+    db_addFolderContains($conn, $folderurl, $fileurl);
+    db_addHasAccess($conn, $user, $folderurl, $fileurl, 1);
+
+    // TODO give access to everyone who access to folder
+    // give access to owner
+    if ($user != $owner) {
+        db_addHasAccess($conn, $owner, $folderurl, $fileurl, 1); 
+    }
+
+    fs_addFile($fileurl, $code);
+
+    //return "Successfully added new file " . $fileurl . "</br>";
+    return $fileurl;
+}
+
+/*
+    addNewFolder($user, $folder) : adds folder $folder to the internal
+        file structure and gives ownership and access to user $user
+
+    $user : string username of the user
+    $folderurl : string folderurl of the folder
+
+    returns : nothing
+*/
+function addNewFolder($user, $folderurl) {
+    global $conn;
+
+    //$user = "mbathio"; //TODO remove
+    //$folder = "mbathio/dir1/"; //TODO remove
+    db_addFolder($conn, $user, $folderurl);
+    db_addHasAccess($conn, $user, $folderurl, ".", 1);
+    fs_addFolder($folderurl);
+
+    return $folderurl;
+}
+
+/*
+    getAnswerSets($code) : get the answer sets for code $code
+
+    $code : string code from the editor
+
+    returns : xml formatted answer sets from the compiler
+*/
+function getAnswerSets($code) {
+    $rawAnswerSets = cp_getAnswerSets($code);
+    $xmlAnswerSets = ps_parseSparc($rawAnswerSets);
+    return $xmlAnswerSets;
+}
+
+function getDrawing($code) {
+    $CanvasAnswerSets = getCanvas($code);
+   // $xmlAnswerSets = ps_parseSparc($rawAnswerSets);
+    return $CanvasAnswerSets;
+}
+
+
+/*
+    getQuery($code, $query) : gets the results after calling a query $query
+        on code $code with the compiler and formats the results into
+        a user-friendly manner
+
+    $code : string code from the editor
+    $query : string query given by the user
+*/
+function getQuery($code, $query) {
+    echo cp_getQuery($code, $query);
+}
+
+/*
+    setCurrentFolder($folder) : sets SESSION variable of currentfolder
+        to folder $folder
+
+    returns : nothing
+    //TODO what happens when session is not started
+*/
+function setCurrentFolder($folder) {
+    $_SESSION["currentfolder"] = $folder;
+    return $folder;
+}
+
+/*
+    setCurrentFile($fileurl) : sets SESSION variable of currentfile
+        to file $file
+
+    returns : string path url to file
+    //TODO what happens when session is not started
+*/
+function setCurrentFile($fileurl) {
+    $_SESSION["currentfile"] = $fileurl;
+    return $fileurl;
+}
+
+/*
+    setCurrentUser($username) : sets SESSION variable of username
+        to user $username
+
+    returns : string username
+    //TODO what happens when session is not started
+*/
+function setCurrentUser($username) {
+    $_SESSION["username"] = $username;
+    return $username;
+}
+
+/*
+    getFileContent($file) : gets the code content of the file $file and
+        returns the code string
+
+    returns : string representation of the code content of the file
+*/
+function getFileContent($fileurl) {
+    return fs_getFileContent($fileurl);
+}
+
+/*
+    deleteFile($username, $fileurl) : if user $username has access to
+        the file $fileurl
+
+    $username : string username of user
+    $fileurl : string path url to the file
+
+    //TODO should we check permissions somewhere else
+*/
+function deleteFile($username, $fileurl) {
+    global $conn;
+
+    $permission = 1; //TODO useless permission
+    if(db_hasAccessFile($conn, $username, $fileurl, $permission)) {
+        db_deleteFile($conn, $fileurl);
+        db_deleteFolderContains($conn, "", $fileurl);
+        db_deleteHasAccess($conn, "", "", $fileurl);
+
+        fs_deleteFile($fileurl);
+        return "Successfully deleted the file " . $fileurl . "</br>";
+    } else {
+        helper_sendError("Do not have access to file " . $fileurl . "</br>");
+        return;
+    }
+}
+
+/*
+    deleteFolder($username, $folderurl) : if user $username has access
+        to the folder $folderurl, then $folderurl is deleted
+
+    $username : string username of user
+    $folderurl : string path url to folder
+
+    returns : success or error message
+*/
+function deleteFolder($username, $folderurl) {
+    global $conn;
+
+    $permission = 1;
+    if (db_hasAccessFolder($conn, $username, $folderurl, $permission)) {
+        // delete underlying files
+        // assumption : no more records with this folder in
+            // HasAccess, FolderContains, File tables
+        $files = db_getFilesInFolder($conn, $folderurl);
+        foreach ($files as $f) {
+            echo deleteFile($username, $f);
+        }
+
+        // delete in Folder table
+        db_deleteFolder($conn, $folderurl);
+
+        // delete in file storage
+        fs_deleteFolder($folderurl);
+        return "Successfully deleted the folder " . $folderurl . "</br>";
+    } else {
+        return "Do not have access to folder " . $folderurl . "</br>";
+    }
+}
+
+/*
+    saveFile($fileurl, $code) : saves file $fileurl with code $code in the
+        file storage. does not currently change the database. If the file
+        does not already exist, creates it
+
+    $fileurl : string path url to the file
+    $code : string code to save
+
+    returns : success or error message
+*/
+function saveFile($user, $fileurl, $code) {
+    global $conn;
+
+    $return = "";
+    if (fs_file_exists($fileurl)) {
+        $return = fs_rewriteFile($fileurl, $code);
+    } else {
+        $return = addNewFile($user, $fileurl, $code);
+    }
+
+    return $return;
+}
+
+/*
+    shareFile($fileurl, $username, $permissions) : shares file $fileurl
+        with user $username with permissions $permissions in the database
+
+    $fileurl: string path url to the file
+    $username : string username of user to share file with
+    $permissions : string of integer permission to share
+
+    returns : success or error message
+*/
+function shareFile($fileurl, $username, $permissions) {
+    global $conn;
+
+    $folders = explode("/", $fileurl);
+    array_pop($folders);
+    $folderurl = implode("/", $folders) . "/";
+
+    $return = db_addHasAccess($conn, $username, $folderurl, $fileurl, $permissions);
+
+    // TODO this is so hacky
+    if ($return == "Added a new row to HasAccess") {
+        return true;
+    }
+    return false;
+}
+
+function addIssue($issue) {
+    return fs_addIssue($issue);
+}
+
+function renameFile($username, $oldfilename, $newfilename) {
+    global $conn;
+
+    $permission = 1;
+    if (db_hasAccessFolder($conn, $username, $oldfilename, $permission)) {
+        $code = getFileContent($oldfilename);
+        addNewFile($username, $newfilename, $code);
+        deleteFile($username, $oldfilename);
+        echo "Successfully renamed the file";
+        return $newfilename;
+    } else {
+        helper_sendError("Do not have access to file " . $oldfilename . "</br>");
+        return;
+    }
+}
+/*
+function forgotPassword($email) {
+    global $conn;
+
+    // get password from db with e-mail
+    $pass = db_getPasswordWithEmail($conn, $email);
+
+    // TODO check if not error
+
+    // e-mail password
+    $subject = "\"Forgotten Password\"";
+    $message = "\"Hello, you have recently indicated that you have forgotten your password on the SPARCE IDE website. Your password is: " . $pass . ".\"";
+    return email_sendEmail($subject, $message, $email);
+
+    //return "Email has been sent.";
+}
+*/
+/*
+    For Mbathio:
+    exampleFileStructure() : creates file structure, does not require
+        the database to populate the files
+        root
+            `- theory.sp
+            `- goals
+
+    return : root folder (beginning of tree structure of directory).
+*/
+function exampleFileStructure() {
+    $root = new Folder("root", "");
+    $goals = new Folder("goals", "");
+    $root->addFolder($goals);
+
+    $theory = new File("theory.sp", "");
+    $goal1 = new File("goal1.sp", "");
+    $goal2 = new File("goal2.sp", "");
+
+    $root->addFile($theory);
+    $goals->addFile($goal1);
+    $goals->addFile($goal2); 
+
+    $folders = $root->getFolders();
+    $files = $goals->getFiles(); 
+
+    return $root;
+}
+
+
+"""
+
+ajaxPHPEndingTag = ' ?>'
+
 ajaxPHPSwitchState = """
 
 if (isset($_POST['action'])) {
@@ -1528,5 +2064,220 @@ case 'getAnswerSets':
             break;
     }
 }
+"""
+
+compileBegin = """
+<?php
+
+/*
+    cp_setupTemporaryFiles($code, $query) : create files temp.sp with 
+        content $code and tempquery.txt with content $query used in the
+        compilation process
+
+    $code : string code from the editor, meant to be compiled
+    $query : string query from the user, can be empty
+
+    returns : nothing
+*/
+function cp_setupTemporaryFiles($code, $query) {
+
+    // TODO: make this file name general
+    $filename = "compiler/SPARC/temp.sp";
+
+    // If we need to create the temporary file, we give it permissions
+    if (file_exists($filename)) {
+        $newfile = fopen($filename, "w+");
+        fwrite($newfile, $code);
+        fclose($newfile);
+    } else {
+        $newfile = fopen($filename, "w+");
+        fwrite($newfile, $code);
+        fclose($newfile);
+        chmod($filename, 0777);
+        // TODO: Change the permissions number
+    }
+
+    // If there is no query, there is nothing to be done
+    if (empty($query)) {
+        return;  
+    }
+
+    $queryfilename = "compiler/SPARC/tempquery.txt";
+
+    if (file_exists($queryfilename)) {
+        $newfile = fopen($queryfilename, "w+");
+        fwrite($newfile, $query . "\nexit"); //necessary to close compiler
+        fclose($newfile);
+    } else {
+        $newfile = fopen($queryfilename, "w+");
+        fwrite($newfile, $query . "\nexit");
+        fclose($newfile);
+        chmod($filename, 0777);
+    }
+
+}
+/////////////////////////
+
+function setupTemporaryFiles_forCanvas($code, $query) {
+
+    // TODO: make this file name general
+    $filename = "compiler/SPARC/Canvas/tempC.sp";
+
+    // If we need to create the temporary file, we give it permissions
+    if (file_exists($filename)) {
+        $newfile = fopen($filename, "w+");
+        fwrite($newfile, $code);
+        fclose($newfile);
+    } else {
+        $newfile = fopen($filename, "w+");
+        fwrite($newfile, $code);
+        fclose($newfile);
+        chmod($filename, 0777);
+        // TODO: Change the permissions number
+    }
+
+    // If there is no query, there is nothing to be done
+    if (empty($query)) {
+        return;  
+    }
+
+
+
+}
+
+
+/*
+    cp_runCompiler($query) : runs the compiler with previously created
+        sparc file in setupTemporaryFiles(). optional: run with query
+        $query
+
+    $query : string query given by the user
+
+    returns : output of the compiler
+*/
+function cp_runCompiler($query) {
+
+    // TODO: Command for more than just the SPARC compiler
+    $command = "";
+    $jarpath = "compiler/SPARC/sparc-new.jar";
+
+    // TODO: make these variables global
+    $tempfilepath = "compiler/SPARC/temp.sp";
+    $queryfilepath = "compiler/SPARC/tempquery.txt";
+    $jarparams = "";
+
+    // If there is no query, then we want answer sets
+    if (empty($query)) {
+        $jarparams = "-A"; // get answer sets for SPARC
+    } else {
+        $command .= "cat " . $queryfilepath . " | "; // cat query
+        // Added YL 12/21/2015 Evgenii introduced -web to deal with queryies with variables for this online
+	// environment. 
+	$jarparams = "-web"; 
+	// End YL 12/21/2015
+    }
+
+    $command .= "java -jar " . $jarpath;
+    $command .= " " . $tempfilepath;
+    $command .= " " . $jarparams;
+    $command .= " " . "2>&1";
+    $output = shell_exec($command);
+
+
+    return $output;
+}
+
+"""
+
+compileEnd = """
+
+////////////////////////////////////
+
+function runCompiler_forCanvas($query) {
+
+
+    // TODO: Command for more than just the SPARC compiler
+    $command = "";
+    $jarpath = "compiler/SPARC/Canvas/par.jar";
+
+    // TODO: make these variables global
+    $tempfilepath = "compiler/SPARC/Canvas/tempC.sp";
+    
+	$command .= "java -jar " . $jarpath;
+    $command .= " " . $tempfilepath;
+   
+    $command .= " " . "2>&1";
+    $output = shell_exec($command);
+
+
+
+    return $output;
+}
+
+
+/*
+    cp_getAnswerSets($code) : get the answer sets for code $code
+
+    $code : string code from the editor
+
+    returns : raw answer set data from compiler
+*/
+function cp_getAnswerSets($code) {
+
+    $query = ""; //TODO this is a hack, no query
+
+	//create a temp.c file containg the code on th editor
+    cp_setupTemporaryFiles($code, $query);
+	
+	//compute answer sets
+    $answersets = cp_runCompiler($query);
+
+    return $answersets;
+}
+
+
+function getCanvas($code) {
+
+    $query = ""; //TODO this is a hack, no query
+
+    setupTemporaryFiles_forCanvas($code, $query);
+    $answersets = runCompiler_forCanvas($query);
+
+    return $answersets;
+}
+
+
+
+
+/*
+    cp_ getQuery($code, $query) : gets results after calling query $query
+        on code $code with the compiler and formats the results into
+        a user-friendly manner
+
+    $code : string code from the editor
+    $query : string query given by the user
+*/
+function cp_getQuery($code, $query) {
+
+    // Setup files for the program compilation and the query text
+    cp_setupTemporaryFiles($code, $query);
+
+    // Compiler returns query answers
+    $queryanswer = cp_runCompiler($query);
+    $queryanswer = nl2br($queryanswer);
+
+    // Structure query output
+    $querykeyword = "?-";
+
+    $splitAnswers = explode($querykeyword, $queryanswer);
+    
+    for ($i = 1; $i < count($splitAnswers)-1; $i++) {
+        echo $query . ": " . $splitAnswers[$i] . "</br>";
+    }
+
+    exit;
+}
+?>
+
 """
 

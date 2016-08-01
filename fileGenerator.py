@@ -180,6 +180,42 @@ fileAjax.write(ajaxCaseBegin)
 
 
 #fileAjax.write('$numPar = helper_getPost("numPar");')
+
+# The place where we write our switch statement functions
+
+
+for but in ajaxList:
+        
+	fileAjax.write("case '"+but+"':")
+	fileAjax.write("echo cp_"+but+"();")
+	fileAjax.write("break;")
+     
+fileAjax.write(ajaxCaseEnd)
+fileAjax.write(ajaxPHPSemiEndingBegin)
+# Insert our function here
+# Based on amount of buttons
+for but in ajaxList:
+        
+	fileAjax.write('function cp_'+but+'(){')
+	fileAjax.write("$output = executeBashCmd();")
+	fileAjax.write("return $output;")
+	fileAjax.write('}')
+
+fileAjax.write(ajaxPHPEndingTag)
+
+fileAjax.close()
+
+
+fileCompile = open("../../compiler/compiler.php", "w")
+
+fileCompile.write(compileBegin)
+
+
+fileCompile.write('function executeBashCmd(){ return "Hello World";}')
+
+###### Stuff to do for compiler.php #####
+
+'''
 for but in ajaxList:
         
 	fileAjax.write("case '"+but+"':")
@@ -187,19 +223,25 @@ for but in ajaxList:
         fileAjax.write("echo '<h2>Parameters: </h2>';")
 	for name,i in ajaxParam:
 
+		# If the name in ajaxParam matches the name of clicked button
+		# Variable i is the number of arguments
 		if name == but:
 			numOfParam = int(i)
 			for x in range(0,i):
+				# Get string that is in parameter p0, p1, etc
 				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
 				fileAjax.write(tempStr)
 
 			fileAjax.write("echo '<h2>Code:</h2> ' . $code . '</br>';")
 	fileAjax.write("break;")
-        
-fileAjax.write(ajaxCaseEnd)
-fileAjax.write(ajaxPHPending)
+'''     
 
-fileAjax.close()
+
+fileCompile.write(compileEnd)
+
+
+fileCompile.close()
+
 
 print 'Done'
 
