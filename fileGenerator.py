@@ -95,7 +95,7 @@ def buttonCheck(xmlElement, direction):
                         text_file.write('e.preventDefault();')
                         text_file.write('var editorValue = editor.getValue();')
                         i = 0
-                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue};")
+                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'program': '"+programSelect+"'};")
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('$.post(compilerurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
@@ -207,6 +207,11 @@ fileAjax.write(ajaxPHPEndingTag)
 fileAjax.close()
 
 
+
+
+###### Stuff to do for compiler.php #####
+
+
 fileCompile = open("../../compiler/compiler.php", "w")
 
 fileCompile.write(compileBegin)
@@ -230,28 +235,6 @@ for but in ajaxList:
 	#fileCompile.write('echo helper_getPost("p0")."<br>";');
 	#fileCompile.write('return "Hello World";}')
 	fileCompile.write('return $command;}')
-
-###### Stuff to do for compiler.php #####
-
-'''
-for but in ajaxList:
-        
-	fileAjax.write("case '"+but+"':")
-        fileAjax.write("echo '<h1>Executing "+but+".exe</h1>';")
-        fileAjax.write("echo '<h2>Parameters: </h2>';")
-	for name,i in ajaxParam:
-		# If the name in ajaxParam matches the name of clicked button
-		# Variable i is the number of arguments
-		if name == but:
-			numOfParam = int(i)
-			for x in range(0,i):
-				# Get string that is in parameter p0, p1, etc
-				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
-				fileAjax.write(tempStr)
-			fileAjax.write("echo '<h2>Code:</h2> ' . $code . '</br>';")
-	fileAjax.write("break;")
-'''     
-
 
 fileCompile.write(compileEnd)
 
