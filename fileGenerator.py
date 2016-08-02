@@ -216,6 +216,7 @@ fileCompile.write(compileBegin)
 
 for but in ajaxList:
 	fileCompile.write('function executeBashCmd_'+but+'(){')
+	fileCompile.write('$command = "";')
 	for name,i in ajaxParam:
 		# If the name in ajaxParam matches the name of clicked button
 		# Variable i is the number of arguments
@@ -223,9 +224,14 @@ for but in ajaxList:
 			numOfParam = int(i)
 			for x in range(0,i):
 				# Get string that is in parameter p0, p1, etc
-				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
+				#tempStr =  'echo " ".helper_getPost("p'+str(x)+'")."</br>";'
+				tempStr =  'echo " ".helper_getPost("p'+str(x)+'");'
+				print tempStr
+				fileCompile.write('$command .= " ".helper_getPost("p'+str(x)+'");')
+				#fileCompile.write(tempStr)
 	#fileCompile.write('echo helper_getPost("p0")."<br>";');
 	#fileCompile.write('return "Hello World";}')
+	fileCompile.write('echo $command;')
 	fileCompile.write('return helper_getPost("p0");}')
 
 ###### Stuff to do for compiler.php #####
