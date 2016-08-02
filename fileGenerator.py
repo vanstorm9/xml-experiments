@@ -79,7 +79,7 @@ def buttonCheck(xmlElement, direction):
                                 i += 1
                         ajaxParam.append([butID,i])
 			paramStr = paramStr + '};'
-                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'numPar':"+str(i)+" " + paramStr)
+                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'program': '"+programSelect+"', 'numPar':"+str(i)+" " + paramStr)
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
                         text_file.write('</script>')
@@ -216,7 +216,7 @@ fileCompile.write(compileBegin)
 
 for but in ajaxList:
 	fileCompile.write('function executeBashCmd_'+but+'(){')
-	fileCompile.write('$command = "";')
+	fileCompile.write('$command = "./".helper_getPost("program");')
 	for name,i in ajaxParam:
 		# If the name in ajaxParam matches the name of clicked button
 		# Variable i is the number of arguments
@@ -225,14 +225,11 @@ for but in ajaxList:
 			for x in range(0,i):
 				# Get string that is in parameter p0, p1, etc
 				#tempStr =  'echo " ".helper_getPost("p'+str(x)+'")."</br>";'
-				tempStr =  'echo " ".helper_getPost("p'+str(x)+'");'
-				print tempStr
 				fileCompile.write('$command .= " ".helper_getPost("p'+str(x)+'");')
 				#fileCompile.write(tempStr)
 	#fileCompile.write('echo helper_getPost("p0")."<br>";');
 	#fileCompile.write('return "Hello World";}')
-	fileCompile.write('echo $command;')
-	fileCompile.write('return helper_getPost("p0");}')
+	fileCompile.write('return $command;}')
 
 ###### Stuff to do for compiler.php #####
 
