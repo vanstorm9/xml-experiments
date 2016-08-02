@@ -97,6 +97,7 @@ def buttonCheck(xmlElement, direction):
                         i = 0
                         text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue};")
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
+                        text_file.write('$.post(compilerurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
                         text_file.write('</script>')
 
@@ -138,7 +139,7 @@ text_file.write('<!DOCTYPE html>')
 text_file.write('<html lang="en">')
 text_file.write(headStr)
 text_file.write('<body>')
-text_file.write("<script>var ajaxurl = 'ajax.php'</script>")
+text_file.write("<script>var ajaxurl = 'ajax.php'; var compilerurl = './compiler/compiler.php'</script>")
 for child in root:
         # We are going to try to e
         if child.tag == 'config':
@@ -197,7 +198,7 @@ fileAjax.write(ajaxPHPSemiEndingBegin)
 for but in ajaxList:
         
 	fileAjax.write('function cp_'+but+'(){')
-	fileAjax.write("$output = executeBashCmd();")
+	fileAjax.write("$output = executeBashCmd_"+but+"();")
 	fileAjax.write("return $output;")
 	fileAjax.write('}')
 
@@ -211,7 +212,20 @@ fileCompile = open("../../compiler/compiler.php", "w")
 fileCompile.write(compileBegin)
 
 
-fileCompile.write('function executeBashCmd(){ return "Hello World";}')
+#fileCompile.write('function executeBashCmd(){ return "Hello World";}')
+
+for but in ajaxList:
+	fileCompile.write('function executeBashCmd_'+but+'(){')
+	for name,i in ajaxParam:
+		# If the name in ajaxParam matches the name of clicked button
+		# Variable i is the number of arguments
+		if name == but:
+			numOfParam = int(i)
+			for x in range(0,i):
+				# Get string that is in parameter p0, p1, etc
+				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
+
+	fileCompile.write('return "Hello World";}')
 
 ###### Stuff to do for compiler.php #####
 
@@ -222,7 +236,6 @@ for but in ajaxList:
         fileAjax.write("echo '<h1>Executing "+but+".exe</h1>';")
         fileAjax.write("echo '<h2>Parameters: </h2>';")
 	for name,i in ajaxParam:
-
 		# If the name in ajaxParam matches the name of clicked button
 		# Variable i is the number of arguments
 		if name == but:
@@ -231,7 +244,6 @@ for but in ajaxList:
 				# Get string that is in parameter p0, p1, etc
 				tempStr =  'echo "p'+str(x)+': ".helper_getPost("p'+str(x)+'")."</br>";'
 				fileAjax.write(tempStr)
-
 			fileAjax.write("echo '<h2>Code:</h2> ' . $code . '</br>';")
 	fileAjax.write("break;")
 '''     
@@ -244,5 +256,3 @@ fileCompile.close()
 
 
 print 'Done'
-
-
