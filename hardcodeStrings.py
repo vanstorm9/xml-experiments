@@ -46,6 +46,232 @@ editorStr = """
             </div>
         </div> <!-- wrapper -->
 """
+filesystem = """
+ <!-- ****** BEGINNING OF SHARE SCREEN ****** -->
+
+
+    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+    <div class="modal-content login-modal">
+        <div class="modal-header login-modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 >Share <i class="fa fa-lock"></i></h4>
+        </div>
+        <div class="modal-body">
+        <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-user"></i></div>
+            <input type="text" class="form-control" id="share_username" placeholder="Username">
+        </div>
+        </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="btn_share" class="btn btn-block bt-login" data-loading-text="Sharing....">Share</button>
+        </div>
+    </div>
+    </div>
+    </div> 
+
+
+    <!-- ****** ENDING OF SHARE SCREEN ****** -->
+
+
+
+    <!-- **** BEGINNING OF LOGOUT **** -->
+
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+    <div class="modal-content login-modal">
+        <div class="modal-header login-modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 >Logout <i class="fa fa-lock"></i></h4>
+        </div>
+        <div class="modal-body"><i class="fa fa-question-circle"></i> Are you sure you want to log-off?</div>
+        <div class="modal-footer"><button type="button" class="btn btn-block bt-login" data-loading-text="Signing out..." id="logout_btn">Logout</button></div>
+    </div>
+    </div>
+    </div>
+
+    <!-- **** END OF LOGOUT **** -->
+
+    <!-- **** BEGINNING OF LOGIN **** -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content login-modal">
+        <div class="modal-header login-modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title text-center" id="loginModalLabel">USER AUTHENTICATION</h4>
+        </div>
+        <div class="modal-body">
+        <div class="text-center">
+            <div role="tabpanel" class="login-tab">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a id="signin-taba" href="#home" aria-controls="home" role="tab" data-toggle="tab">Sign In</a></li>
+                    <li role="presentation"><a id="signup-taba" href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Sign Up</a></li>
+                    <li role="presentation"><a id="forgetpass-taba" href="#forget_password" aria-controls="forget_password" role="tab" data-toggle="tab">Forget Password</a></li>
+                </ul>
+            
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active text-center" id="home">
+                    &nbsp;&nbsp;
+                    <span id="login_fail" class="response_error" style="display: none;">Log-in failed, please try again.</span>
+                    <div class="clearfix"></div>
+                    <form>
+                        <span class="help-block-has-error" id="user-error" >This field is required</span>
+                        <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                            <input type="text" class="form-control" id="login_username" placeholder="Username">
+                        </div>
+                        </div>
+                        <span class="help-block-has-error" id="password-error" >This field is required</span>
+                        <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="fa fa-lock"></i></div>
+                            <input type="password" class="form-control" id="password" placeholder="Password">
+                        </div>
+                        </div>
+                        <button type="button" id="login_btn" class="btn btn-block bt-login" data-loading-text="Signing In....">Login</button>
+                        <div class="clearfix"></div>
+                        <div class="login-modal-footer">
+                        <div class="row">
+                        <div class="col-xs-8 col-sm-8 col-md-8">
+                            <i class="fa fa-lock"></i>
+                            <a href="javascript:;" class="forgetpass-tab"> Forgot password? </a>
+                        
+                        </div>
+                        
+                        <div class="col-xs-4 col-sm-4 col-md-4">
+                            <i class="fa fa-check"></i>
+                            <a href="javascript:;" class="signup-tab"> Sign Up </a>
+                        </div>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="profile">
+                        &nbsp;&nbsp;
+                        <span id="registration_fail" class="response_error" style="display: none;">Registration failed, please try again.</span>
+                        <div class="clearfix"></div>
+                        <form id="register">
+                            <span class="help-block-has-error" data-error='0' id="username-error">This field is required</span>
+                            <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                                <input type="text" class="form-control" id="username" placeholder="Username">
+                            </div>
+                            </div>
+                            <span class="help-block-has-error" data-error='0' id="remail-error">This field is required</span>
+                            <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-at"></i></div>
+                                <input type="text" class="form-control" id="remail" placeholder="Email">
+                            </div>
+                            </div>
+                            <span class="help-block-has-error" data-error='0' id="repassword-error">This field is required</span>
+                            <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-lock"></i></div>
+                                <input type="password" class="form-control" id="repassword" placeholder="Password">
+                            </div>
+                            </div>
+                            <span class="help-block-has-error" data-error='0' id="conf-repassword-error">Passwords not matching.</span>
+                            <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-lock"></i></div>
+                                <input type="password" class="form-control" id="conf-repassword" placeholder="Confirm Password">
+                            </div>
+                            </div>
+
+                            <button type="button" id="register_btn" class="btn btn-block bt-login" data-loading-text="Registering....">Register</button>
+                            <div class="clearfix"></div>
+                            <div class="login-modal-footer">
+                            <div class="row">
+                                <div class="col-xs-8 col-sm-8 col-md-8">
+                                    <i class="fa fa-lock"></i>
+                                    <a href="javascript:;" class="forgetpass-tab"> Forgot password? </a>
+                                </div>
+                                
+                                <div class="col-xs-4 col-sm-4 col-md-4">
+                                    <i class="fa fa-check"></i>
+                                    <a href="javascript:;" class="signin-tab"> Sign In </a>
+                                </div>
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane text-center" id="forget_password">
+                        &nbsp;&nbsp;
+                        <span id="reset_fail" class="response_error" style="display: none;"></span>
+                        <div class="clearfix"></div>
+                        <form>
+                        <span class="help-block-has-error" data-error='0' id="femail-error">This field is required</span>
+                        <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                            <input type="text" class="form-control" id="femail" placeholder="Email">
+                        </div>
+                        </div>
+                            
+                        <button type="button" id="reset_btn" class="btn btn-block bt-login" data-loading-text="Please wait....">Forget Password</button>
+                        <div class="clearfix"></div>
+                        <div class="login-modal-footer">
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                <i class="fa fa-lock"></i>
+                                <a href="javascript:;" class="signin-tab"> Sign In </a>
+                            </div>
+                            
+                            <div class="col-xs-6 col-sm-6 col-md-6">
+                                <i class="fa fa-check"></i>
+                                <a href="javascript:;" class="signup-tab"> Sign Up </a>
+                            </div>
+                        </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+"""
+
+filesystemNavbar = """
+<ul class="nav navbar-nav navbar-left">
+                    <!-- OPEN BUTTON -->
+                    <li> <button type="button" class="btn btn-default navbar-btn" id="menu-toggle" value="getAccessibleDirectory">
+                        Directory
+                    </button> </li>
+
+                    <!-- NEW BUTTON -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="btn_new">
+                            New
+                            <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="newFolder">New Folder</a></li>
+                            <li><a href="#" id="newFile">New File</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- SAVE BUTTON -->
+                    <li> <button type="button" class="btn btn-default navbar-btn" id="btn_save">
+                        Save
+                    </button> </li>
+                    <!-- SHARE BUTTON -->
+                    <li><a class="btn btn-launch" href="javascript:;" data-toggle="modal" data-target="#shareModal" id="navbar_btn_share">Share</a></li>
+                    <!-- ISSUES  BUTTON -->
+                    <li><a class="btn btn-launch" id="navbar_btn_issues">Issues?</a></li>
+                </ul>
+"""
 
 bottomJS = """
 

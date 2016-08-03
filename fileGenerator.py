@@ -11,6 +11,8 @@ text_file = open("../../test.php", "w")
 
 ajaxList = []
 ajaxParam = []
+settingsOpt = []
+
 
 def buttonCheck(xmlElement, direction):
         # Going to generate HTML buttons
@@ -130,9 +132,18 @@ def configCheck(xmlElement):
                                                 for i in range(1,int(chosenInt)+1):
                                                         text_file.write('<option value="'+str(i)+'">' + str(i) + '</option>')
                                                 text_file.write('</select></br></br>')
-                                
+
                 text_file.write(saveSettingsBut)
+		# Here we will write the script that will generate the setting functions
+		#for options in settingsOpt:	
                 text_file.write(configModalEnd)
+
+
+def filesystemCheck(xmlElement):
+	if xmlElement.tag == 'filesystem':
+		text_file.write(filesystemNavbar)
+		text_file.write(filesystem)
+
 
 
 text_file.write('<!DOCTYPE html>')
@@ -142,7 +153,9 @@ text_file.write('<body>')
 text_file.write("<script>var ajaxurl = 'ajax.php'; var compilerurl = './compiler/compiler.php'</script>")
 for child in root:
         # We are going to try to e
-        if child.tag == 'config':
+        if child.tag == 'filesystem':
+        	filesystemCheck(child)
+	if child.tag == 'config':
                 configCheck(child)
         
         if child.tag == 'navbar':
