@@ -12,6 +12,22 @@ text_file = open("../../test.php", "w")
 ajaxList = []
 ajaxParam = []
 settingsOpt = []
+selectOptionList = [] 
+selectOptionParam = []
+
+selectNumList = []
+selectNumParam = []
+
+def buttonRunCheck(xmlElement):
+	if xmlElement.tag == 'buttonRun':
+		runID = ''
+		runText = ''
+	
+		for subTags in xmlElement:
+			if subTags.tag == 'text':
+				runText = subTags.text
+			elif subTags.tag == 'id':
+				runID = subTags.text
 
 
 def buttonCheck(xmlElement, direction):
@@ -79,9 +95,31 @@ def buttonCheck(xmlElement, direction):
                                 text_file.write("var queryValue"+str(i)+" = $('#"+textFieldID+"').val();")
                                 paramStr = paramStr + ",'p"+str(i)+"': queryValue"+str(i) 
                                 i += 1
+                        for textFieldID in textFieldIDList:
+                                text_file.write("var queryValue"+str(i)+" = $('#"+textFieldID+"').val();")
+                                paramStr = paramStr + ",'p"+str(i)+"': queryValue"+str(i) 
+                                i += 1
                         ajaxParam.append([butID,i])
-			paramStr = paramStr + '};'
-                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'program': '"+programSelect+"', 'numPar':"+str(i)+" " + paramStr)
+
+			j = 0
+                        paramOptionStr = ""
+                        for optionID in selectOptionList:
+                                text_file.write("var selectOptionValue"+str(j)+" = $('#"+optionID+"').val();")
+                                paramOptionStr = paramOptionStr + ",'o"+str(j)+"': selectOptionValue"+str(j) 
+                                j += 1
+			selectOptionParam.append([optionID, j])			
+
+			k = 0
+                        paramNumStr = ""
+                        for optionNumID in selectNumList:
+                                text_file.write("var selectNumberValue"+str(k)+" = $('#"+optionNumID+"').val();")
+                                paramNumStr = paramNumStr + ",'n"+str(k)+"': selectNumberValue"+str(k) 
+                                k += 1
+
+			selectNumParam.append([paramNumStr, k])			
+
+                        text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'program': '"+programSelect+"', 'numPar':"+str(i)+" " + paramStr + ", 'selectOption':"+str(i)+" " + paramOptionStr)
+			text_file.write('};')
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('});')
                         text_file.write('</script>')
@@ -96,7 +134,24 @@ def buttonCheck(xmlElement, direction):
                         text_file.write("$('#"+butID+"').click(function(e) {")
                         text_file.write('e.preventDefault();')
                         text_file.write('var editorValue = editor.getValue();')
-                        i = 0
+                        
+			paramOptionStr = ""
+			j = 0	
+                        for optionID in selectOptionList:
+                                text_file.write("var selectOptionValue"+str(j)+" = $('#"+optionID+"').val();")
+                                paramOptionStr = paramOptionStr + ",'o"+str(j)+"': selectOptionValue"+str(j) 
+                                j += 1
+			selectOptionParam.append([optionID, j])			
+
+			k = 0
+			paramNumStr = ""
+                        for optionNumID in selectNumList:
+                                text_file.write("var selectNumberValue"+str(k)+" = $('#"+optionNumID+"').val();")
+                                paramNumStr = paramNumStr + ",'n"+str(k)+"': selectNumberValue"+str(k) 
+                                k += 1
+
+			selectNumParam.append([paramNumStr, k])			
+
                         text_file.write("var data = {'action': \""+butID+"\",'editor': editorValue, 'program': '"+programSelect+"'};")
                         text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
                         text_file.write('$.post(compilerurl, data, function(response) {setResultsToString(response);});')
@@ -124,6 +179,8 @@ def configCheck(xmlElement):
                                                                 optionStr = '<option value="'+optionSolver+'">' + optionSolver + '</option>'
                                                                 text_file.write(optionStr)
                                                 text_file.write('</select></br></br>')
+						selectOptionList.append(configOptionID)
+
                                         elif options.tag == 'optionInput':
                                                 text_file.write(configOptionID)
                                                 chosenInt = options.text
@@ -132,6 +189,8 @@ def configCheck(xmlElement):
                                                 for i in range(1,int(chosenInt)+1):
                                                         text_file.write('<option value="'+str(i)+'">' + str(i) + '</option>')
                                                 text_file.write('</select></br></br>')
+						
+						selectNumList.append(configOptionID)
 
                 text_file.write(saveSettingsBut)
 		# Here we will write the script that will generate the setting functions
@@ -142,7 +201,7 @@ def configCheck(xmlElement):
 def filesystemCheck(xmlElement):
 	if xmlElement.tag == 'filesystem':
 		text_file.write(filesystemNavbar)
-		text_file.write(filesystem)
+		text_file.write(dialog)
 
 
 
@@ -167,11 +226,13 @@ for child in root:
                     for leftElement in navbarChild:
 
                         buttonCheck(leftElement, navbarChild.tag)
+			buttonRunCheck(leftElement)
                     text_file.write('</ul>')
                 elif navbarChild.tag == 'right':
                     text_file.write('<ul class="nav navbar-nav navbar-right">')
                     for rightElement in navbarChild:
                         buttonCheck(rightElement, navbarChild.tag)
+			buttonRunCheck(rightElement)
                     text_file.write(loginBut)
                     text_file.write('</ul>')
             text_file.write(navTemplateEnd)
@@ -203,9 +264,10 @@ for but in ajaxList:
 	fileAjax.write("case '"+but+"':")
 	fileAjax.write("echo cp_"+but+"();")
 	fileAjax.write("break;")
-     
+
 fileAjax.write(ajaxCaseEnd)
 fileAjax.write(ajaxPHPSemiEndingBegin)
+
 # Insert our function here
 # Based on amount of buttons
 for but in ajaxList:
