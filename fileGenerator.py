@@ -19,15 +19,58 @@ selectNumList = []
 selectNumParam = []
 
 def buttonRunCheck(xmlElement):
+                
+	butClass = 'class="btn btn-default navbar-btn"'
+	
 	if xmlElement.tag == 'buttonRun':
+		# For each button
 		runID = ''
 		runText = ''
 	
 		for subTags in xmlElement:
+			# For each subtag
 			if subTags.tag == 'text':
 				runText = subTags.text
 			elif subTags.tag == 'id':
 				runID = subTags.text
+                
+
+		buttonHTML = '<button '+ butClass +'id="'+ runID +'">'+ runText +'</button>'
+		
+
+                text_file.write('<li>')
+		text_file.write(buttonHTML)
+                text_file.write('</li>')
+
+
+		text_file.write('<script>')
+		text_file.write("$('#"+runID+"').click(function(e) {")
+		text_file.write('e.preventDefault();')
+		text_file.write('var editorValue = editor.getValue();')
+		
+		paramOptionStr = ""
+		j = 0	
+		for optionID in selectOptionList:
+			text_file.write("var selectOptionValue"+str(j)+" = $('#"+optionID+"').val();")
+			paramOptionStr = paramOptionStr + ",'o"+str(j)+"': selectOptionValue"+str(j) 
+			j += 1
+		selectOptionParam.append([optionID, j])			
+
+		k = 0
+		paramNumStr = ""
+		for optionNumID in selectNumList:
+			text_file.write("var selectNumberValue"+str(k)+" = $('#"+optionNumID+"').val();")
+			paramNumStr = paramNumStr + ",'n"+str(k)+"': selectNumberValue"+str(k) 
+			k += 1
+
+		selectNumParam.append([paramNumStr, k])			
+
+		text_file.write("var data = {'action': \"getAnswerSets\", 'id': \""+runID+"\",'editor': editorValue};")
+		text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
+		text_file.write('$.post(compilerurl, data, function(response) {setResultsToString(response);});')
+		text_file.write('});')
+		text_file.write('</script>')
+
 
 
 def buttonCheck(xmlElement, direction):
@@ -257,6 +300,7 @@ fileAjax.write(ajaxCaseBegin)
 #fileAjax.write('$numPar = helper_getPost("numPar");')
 
 # The place where we write our switch statement functions
+
 
 
 for but in ajaxList:
