@@ -331,13 +331,13 @@ fileAjax.write(ajaxPHPSemiEndingBegin)
 # Based on amount of buttons
 
 fileAjax.write('function cp_ourGetAnswerSets($code, $solver){')
-fileAjax.write('echo $solver;')
+#fileAjax.write('echo $solver;')
 fileAjax.write('if(strcmp(strtolower($solver), "sparc") == 0){')
 fileAjax.write('$rawAnswerSets = cp_getAnswerSets($code);')
 fileAjax.write('$xmlAnswerSets = ps_parseSparc($rawAnswerSets);')
 fileAjax.write('return $xmlAnswerSets;')
 fileAjax.write('} else if(strcmp(strtolower($solver),"dlv")==0){')
-fileAjax.write('$xmlAnswerSets = "Running DLV code";')
+fileAjax.write('$xmlAnswerSets = runDLV();')
 fileAjax.write('return $xmlAnswerSets;')
 fileAjax.write("} else {return 'No code avaliable';}")
 fileAjax.write('}')
@@ -363,7 +363,10 @@ fileCompile = open("../../compiler/compiler.php", "w")
 
 fileCompile.write(compileBegin)
 
-
+fileCompile.write('function runDLV(){')
+fileCompile.write('echo "Output:</br>";')
+fileCompile.write('return shell_exec("dlv -silent ./SPARC/temp.sp");')
+fileCompile.write('}')
 
 for but in ajaxList:
 	fileCompile.write('function executeBashCmd_'+but+'(){')
