@@ -18,8 +18,12 @@ selectOptionParam = []
 selectNumList = []
 selectNumParam = []
 
+solverList = []
+solverStr = ''
+
+
 def buttonRunCheck(xmlElement):
-                
+        global solverStr
 	butClass = 'class="btn btn-default navbar-btn"'
 	
 	if xmlElement.tag == 'buttonRun':
@@ -64,10 +68,12 @@ def buttonRunCheck(xmlElement):
 			k += 1
 
 		selectNumParam.append([paramNumStr, k])			
-
-		text_file.write("var data = {'action': \"getAnswerSets\", 'id': \""+runID+"\",'editor': editorValue};")
+		text_file.write('var solve_e = document.getElementById("'+solverStr+'");')
+		text_file.write('var solverStr = solve_e.options[solve_e.selectedIndex].value;')
+		text_file.write("var data = {'action': \"ourGetAnswerSets\", 'id': \""+runID+"\", 'solver': solverStr ,'editor': editorValue};")
 		text_file.write('$.post(ajaxurl, data, function(response) {setResultsToString(response);});')
 		text_file.write('$.post(compilerurl, data, function(response) {setResultsToString(response);});')
+		text_file.write('alert(solverStr);')
 		text_file.write('});')
 		text_file.write('</script>')
 
@@ -203,6 +209,7 @@ def buttonCheck(xmlElement, direction):
 
 
 def configCheck(xmlElement):
+	global solverStr
         if xmlElement.tag == 'config':
                 text_file.write(configBut)
                 
@@ -234,12 +241,16 @@ def configCheck(xmlElement):
                                                 text_file.write('</select></br></br>')
 						
 						selectNumList.append(configOptionID)
+					elif options.tag == 'commandSwitch':
+						if options.text == '-solver':
+							solverStr = configOptionID
+
 
                 text_file.write(saveSettingsBut)
 		# Here we will write the script that will generate the setting functions
 		#for options in settingsOpt:	
                 text_file.write(configModalEnd)
-
+		
 
 def filesystemCheck(xmlElement):
 	if xmlElement.tag == 'filesystem':
@@ -303,6 +314,10 @@ fileAjax.write(ajaxCaseBegin)
 
 
 
+fileAjax.write("case 'ourGetAnswerSets':")
+fileAjax.write("echo cp_ourGetAnswerSets($code, helper_getPost('solver'));")
+fileAjax.write("break;")
+
 for but in ajaxList:
         
 	fileAjax.write("case '"+but+"':")
@@ -314,6 +329,18 @@ fileAjax.write(ajaxPHPSemiEndingBegin)
 
 # Insert our function here
 # Based on amount of buttons
+
+fileAjax.write('function cp_ourGetAnswerSets($code, $solver){')
+fileAjax.write('echo $solver;')
+#fileAjax.write('if(strtolower($solver) == "sparc"){')
+fileAjax.write('$rawAnswerSets = cp_getAnswerSets($code);')
+fileAjax.write('$xmlAnswerSets = ps_parseSparc($rawAnswerSets);')
+#fileAjax.write('} else if(strtolower($solver) == "dlv"){')
+#fileAjax.write('$xmlAnswerSets = "Running DLV code";')
+#fileAjax.write("}")
+fileAjax.write('return $xmlAnswerSets;')
+fileAjax.write('}')
+
 for but in ajaxList:
         
 	fileAjax.write('function cp_'+but+'(){')
@@ -336,7 +363,6 @@ fileCompile = open("../../compiler/compiler.php", "w")
 fileCompile.write(compileBegin)
 
 
-#fileCompile.write('function executeBashCmd(){ return "Hello World";}')
 
 for but in ajaxList:
 	fileCompile.write('function executeBashCmd_'+but+'(){')
