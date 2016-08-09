@@ -332,13 +332,14 @@ fileAjax.write(ajaxPHPSemiEndingBegin)
 
 fileAjax.write('function cp_ourGetAnswerSets($code, $solver){')
 fileAjax.write('echo $solver;')
-#fileAjax.write('if(strtolower($solver) == "sparc"){')
+fileAjax.write('if(strcmp(strtolower($solver), "sparc") == 0){')
 fileAjax.write('$rawAnswerSets = cp_getAnswerSets($code);')
 fileAjax.write('$xmlAnswerSets = ps_parseSparc($rawAnswerSets);')
-#fileAjax.write('} else if(strtolower($solver) == "dlv"){')
-#fileAjax.write('$xmlAnswerSets = "Running DLV code";')
-#fileAjax.write("}")
 fileAjax.write('return $xmlAnswerSets;')
+fileAjax.write('} else if(strcmp(strtolower($solver),"dlv")==0){')
+fileAjax.write('$xmlAnswerSets = "Running DLV code";')
+fileAjax.write('return $xmlAnswerSets;')
+fileAjax.write("} else {return 'No code avaliable';}")
 fileAjax.write('}')
 
 for but in ajaxList:
